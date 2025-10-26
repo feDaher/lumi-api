@@ -1,0 +1,188 @@
+// ---- PRISMA CONFIG ----
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---- ENUMS ----
+// Status do usuário
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
+// Categoria de risco (teste de risco)
+enum RiskCategory {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// Status do alerta (histórico)
+enum AlertStatus {
+  OPEN
+  FORWARDED
+  CLOSED
+}
+
+// ---- MODELS ----
+
+// Usuário do sistema (autenticável)
+model User {
+  id        String      @id @default(cuid())
+  name      String      // nome do usuário
+  email     String      @unique // e-mail (login)
+  password  String      // hash (bcrypt)
+  cpf       String      @unique // CPF (identificador nacional)
+  status    UserStatus  @default(ACTIVE) // status do usuário
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  // relações
+  contacts      Contact[]
+  riskTests     RiskTest[]
+  alerts        Alert[]
+  sessions      Session[] // sessões/tokens ativos
+}
+
+// Sessão/autenticação (controle de token por usuário)
+model Session {
+  id           String   @id @default(cuid())
+  token        String   @unique // token JWT (ou referência)
+  active       Boolean  @default(true) // se a sessão está ativa
+  lastAccess   DateTime @default(now()) // último acesso
+  createdAt    DateTime @default(now())
+
+  userId String
+  user   User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+// Contatos cadastrados pelo usuário (para notificação)
+model Contact {
+  id        String   @id @default(cuid())
+  name      String   // nome do contato
+  phone     String   // telefone do contato
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User     @relation(fields: [userId], references: [id])
+
+  // N:N com Alert via tabela pivô
+  alerts AlertContacts[]
+
+  @@index([userId])
+}
+
+// Geolocalização (endereço + coordenadas)
+model Geolocation {
+  id        String   @id @default(cuid())
+  street    String?  // nome da rua
+  city      String?  // cidade
+  district  String?  // bairro
+  number    String?  // número
+  latitude  Float?   // latitude
+  longitude Float?   // longitude
+  createdAt DateTime @default(now())
+
+  // 1:1 com Alert
+  alert Alert?
+}
+
+// Alerta (gerado pelo usuário)
+model Alert {
+  id           String   @id @default(cuid())
+  userCpf      String   // cpf do usuário no momento do alerta (snapshot)
+  createdAt    DateTime @default(now())
+  locationText String?  // texto livre, ex.: "Lat:-20.3,Lng:-41.9"
+  notes        String?  // observações
+
+  userId String
+  user   User     @relation(fields: [userId], references: [id])
+
+  // 1:1 com Geolocation
+  geolocationId String? @unique
+  geolocation   Geolocation? @relation(fields: [geolocationId], references: [id])
+
+  // N:N Contacts e Authorities
+  contacts    AlertContacts[]
+  authorities AlertAuthorities[]
+
+  // Histórico de status do alerta
+  statusHistory AlertStatusRecord[]
+
+  @@index([userId])
+}
+
+// Pivô N:N Alert <-> Contact
+model AlertContacts {
+  alertId   String
+  contactId String
+
+  alert   Alert   @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([alertId, contactId])
+  @@index([contactId])
+}
+
+// Autoridades (destinatários oficiais)
+model Authority {
+  id        String   @id @default(cuid())
+  agency    String   // ex.: "Military Police - 11th BPM"
+  channel   String?  // ex.: "190", "API", "E-mail"
+  contact   String?  // e-mail/phone/webhook/etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  alerts AlertAuthorities[]
+}
+
+// Pivô N:N Alert <-> Authority
+model AlertAuthorities {
+  alertId     String
+  authorityId String
+
+  alert     Alert     @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  authority Authority @relation(fields: [authorityId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([alertId, authorityId])
+  @@index([authorityId])
+}
+
+// Teste de risco (respostas do usuário ao questionário)
+model RiskTest {
+  id            String        @id @default(cuid())
+  score         Int           // pontuação final
+  category      RiskCategory  // categoria (LOW/MEDIUM/HIGH)
+  recommendations String[]    // recomendações (text[])
+  createdAt     DateTime      @default(now())
+
+  userId String
+  user   User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+// Registro de status do alerta (histórico)
+model AlertStatusRecord {
+  id        String      @id @default(cuid())
+  alertId   String
+  alert     Alert       @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  status    AlertStatus @default(OPEN) // status do alerta
+  note      String?     // observação opcional
+  createdAt DateTime    @default(now())
+
+  @@index([alertId])
+}
