@@ -39,9 +39,14 @@ OBS: Se a porta 5432 já estiver em uso, troque a linha para "5433:5432" e use 5
 ## Rode as seeds
 
 ```bash
-tsx seeds
+tsx seed
+```
+ou
+```bash
+npm run seed
 ```
 (ou verifique no package.json)
+
 ## Inicie o projeto
 
 npm run dev
