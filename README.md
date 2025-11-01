@@ -36,6 +36,12 @@ docker ps   # deve listar o container lumi_pg
 
 OBS: Se a porta 5432 já estiver em uso, troque a linha para "5433:5432" e use 5433 na DATABASE_URL.
 
+## Rode as seeds
+
+```bash
+tsx seeds
+```
+(ou verifique no package.json)
 ## Inicie o projeto
 
 npm run dev
