@@ -3,8 +3,8 @@ import { signInSchema, signUpSchema } from './auth.schemas';
 import * as svc from './auth.service';
 
 export async function postSignUp(req: Request, res: Response) {
-  const { name, email, password } = signUpSchema.parse(req.body);
-  const result = await svc.signUp(name, email, password);
+  const { name, cpf ,email, password } = signUpSchema.parse(req.body);
+  const result = await svc.signUp(name, cpf ,email, password);
   return res.status(201).json(result);
 }
 
