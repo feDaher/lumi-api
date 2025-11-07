@@ -6,9 +6,9 @@ services:
     container_name: lumi_pg
     restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=lumiapi
+      - POSTGRES_USER=lumi
+      - POSTGRES_PASSWORD=lumi
+      - POSTGRES_DB=lumi
     ports:
       - '5433:5432'
     volumes:

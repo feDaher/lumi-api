@@ -3,7 +3,7 @@
 First, run the development server:
 
 ```bash
-Node.js 18+ e npm
+Node.js 20+ e npm
 
 Docker Desktop (Windows/macOS) ou Docker Engine (Linux)
 
@@ -28,6 +28,9 @@ Se você ainda não tiver adicionado, instale também:
 ```bash
 npm i -D tsx
 ```
+
+## Env:
+Crie um arquivo .env, copie o que está no env.sample e no classroom em "materiais" tem os valores das variaveis de ambiente.
 
 ## Docker (suba o banco):
 
