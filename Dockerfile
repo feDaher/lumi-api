@@ -10,7 +10,6 @@ ENV DATABASE_URL=${DATABASE_URL}
 RUN npx prisma generate
 
 COPY . .
-
 RUN npm run build
 
 EXPOSE 3333
