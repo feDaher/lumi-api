@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "module": "ES2020",
+    "target": "ES2022",
+    "module": "CommonJS",
     "moduleResolution": "node",
+    "rootDir": "src",
     "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
@@ -10,13 +11,6 @@
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": [
-    "src/**/*",
-    "env.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "prisma.config.ts"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "prisma.config.ts"]
 }

@@ -1,29 +1,37 @@
 # docker-compose.yml
-
 services:
   db:
     image: postgres:16
     container_name: lumi_pg
     restart: always
     environment:
-      - POSTGRES_USER=lumi
-      - POSTGRES_PASSWORD=lumi
-      - POSTGRES_DB=lumi
+      POSTGRES_USER: lumi
+      POSTGRES_PASSWORD: lumi
+      POSTGRES_DB: lumi
     ports:
-      - '5433:5432'
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lumi -d lumi"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   api:
-    build: .
+    build:
+      context: .
+      args:
+        DATABASE_URL: ${DATABASE_URL}
     container_name: lumi_api
     restart: always
     ports:
-      - '3333:3336'
+      - "3333:3333"
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
   pgdata:
