@@ -2,11 +2,12 @@
   "name": "lumi-api",
   "version": "1.0.0",
   "type": "module",
- "scripts": {
-    "prestart": "npx prisma generate", 
-    "start": "node dist/app.js",     
-    "build": "tsc",
-    "dev": "ts-node-dev --transpile-only src/app.ts"
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "seed": "tsx src/seed.ts",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +32,6 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.9.1",
     "tsx": "^4.20.6",
-    "typescript": "^5.4.5"
+    "typescript": "^5.9.3"
   }
 }
