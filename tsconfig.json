@@ -12,6 +12,6 @@
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "env.ts"],
   "exclude": ["node_modules", "dist", "prisma.config.ts"]
 }

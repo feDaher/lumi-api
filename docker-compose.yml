@@ -4,11 +4,11 @@ services:
     container_name: lumi_pg
     restart: always
     environment:
-      POSTGRES_USER: lumi
-      POSTGRES_PASSWORD: lumi
-      POSTGRES_DB: lumi
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: lumiapi
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -25,7 +25,7 @@ services:
     container_name: lumi_api
     restart: always
     ports:
-      - "3333:3333"
+      - "3333:3334"
     env_file:
       - .env
     depends_on:
