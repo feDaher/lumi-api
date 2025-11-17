@@ -1,9 +1,7 @@
-// src/seed.ts
 import { prisma } from './prisma';
 import bcrypt from 'bcrypt';
 
 async function main() {
-  // limpar em ordem segura (tabelas de junção e dependentes antes)
   await prisma.alertAuthorities.deleteMany();
   await prisma.alertContacts.deleteMany();
   await prisma.alertStatusRecord.deleteMany();
