@@ -1,16 +1,20 @@
 FROM node:20-alpine
+
 WORKDIR /app
 
+# Copia dependências
 COPY package*.json ./
 RUN npm ci --include=dev
 
-COPY prisma ./prisma
-ARG DATABASE_URL
-ENV DATABASE_URL=${DATABASE_URL}
+# Copia TODA a aplicação (inclusive prisma/schema.prisma)
+COPY . .
+
+# Gera o Prisma Client DEPOIS de copiar tudo
 RUN npx prisma generate
 
-COPY . .
+# Build do projeto
 RUN npm run build
 
 EXPOSE 3333
-CMD ["node","dist/server.js"]
+CMD ["node", "dist/server.js"]
+

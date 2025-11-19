@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import 'express-async-errors';
 import { env } from './env';
-import { errorMiddleware } from './middlewares/error';
+import { errorMiddleware } from './errors/errorMiddleware';
 import { logger } from './logger';
 import authRoutes from './modules/auth/auth.routes';
 // import usersRoutes from './modules/users/users.routes';
