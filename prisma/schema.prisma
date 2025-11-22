@@ -48,6 +48,7 @@ model User {
   riskTests     RiskTest[]
   alerts        Alert[]
   sessions      Session[] // sessões/tokens ativos
+  addresses     Address[] 
 }
 
 // Sessão/autenticação (controle de token por usuário)
@@ -185,4 +186,19 @@ model AlertStatusRecord {
   createdAt DateTime    @default(now())
 
   @@index([alertId])
+}
+
+// Endereço padrão do usuário
+model Address {
+  id        String    @id @default(cuid())
+  logradouro String? //nome da rua/avenida
+  number    String?  //Número da casa
+  cep       String?  //CEP
+  district  String?  //Bairo
+  complement String? //Complemento
+  createdAt DateTime @default(now())
+
+  // Relacionamento com usuário
+  userId String
+  user   User     @relation(fields: [userId], references: [id])
 }
