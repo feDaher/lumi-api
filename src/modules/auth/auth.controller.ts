@@ -9,7 +9,22 @@ export async function postSignUp(req: Request, res: Response) {
 }
 
 export async function postSignIn(req: Request, res: Response) {
-  const { email, password } = signInSchema.parse(req.body);
-  const result = await svc.signIn(email, password);
-  return res.json(result);
+  try{
+    const { email, password } = signInSchema.parse(req.body);
+    const result = await svc.signIn(email, password);
+    return res.json(result);
+  
+  }catch(error: any){
+    if(error === 401) {
+      return res.status(401).json({
+        name: error.name || 'Unauthorized',
+        message: error.message || 'Credênciais inválidas',
+      });
+    }
+  return res.status(500).json({
+  name: error.name || 'ServerError',
+  message: error.message || 'Server Error',
+  });
+}
+
 }
