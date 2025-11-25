@@ -11,5 +11,5 @@ export const contactCreateSchema = z.object({
 export const contactUpdateSchema = contactCreateSchema.partial();
 
 export const contactParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().cuid(),
 });
