@@ -1,7 +1,9 @@
-import { prisma } from './prisma';
-import bcrypt from 'bcrypt';
+import { prisma } from "./prisma";
+import bcrypt from "bcrypt";
 
 async function main() {
+  console.log("Limpando dados anteriores...");
+
   await prisma.alertAuthorities.deleteMany();
   await prisma.alertContacts.deleteMany();
   await prisma.alertStatusRecord.deleteMany();
@@ -13,78 +15,130 @@ async function main() {
   await prisma.session.deleteMany();
   await prisma.user.deleteMany();
 
-  const passwordHash = await bcrypt.hash('123456', 10);
+  console.log("Criando usuário seed...");
+
+  const passwordHash = await bcrypt.hash("123456", 10);
+
   const user = await prisma.user.create({
     data: {
-      name: 'Felipe',
-      email: 'felipe@example.com',
+      name: "Felipe",
+      email: "felipe@example.com",
       password: passwordHash,
-      cpf: '12345678901',
-      status: 'ACTIVE',
+      cpf: "12345678901",
+      role: "ADMIN",
+      status: "ACTIVE",
     },
   });
 
-  const contact1 = await prisma.contact.create({
-    data: { userId: user.id, name: 'Contato 1', phone: '+55 33 99999-0001' },
-  });
-  const contact2 = await prisma.contact.create({
-    data: { userId: user.id, name: 'Contato 2', phone: '+55 33 99999-0002' },
+  console.log(`Usuário criado: ${user.id}`);
+
+  console.log("Criando contatos padrão...");
+
+  const contatos = await prisma.contact.createMany({
+    data: [
+      {
+        userId: user.id,
+        name: "Contato 1",
+        ddd: "33",
+        phone: "99990001",
+      },
+      {
+        userId: user.id,
+        name: "Contato 2",
+        ddd: "33",
+        phone: "99990002",
+      },
+    ],
   });
 
+  console.log(`Contatos criados: ${contatos.count}`);
+
+  console.log("Criando autoridade seed...");
   const authority = await prisma.authority.create({
-    data: { agency: 'Military Police - 11th BPM', channel: '190', contact: '190' },
+    data: {
+      agency: "Polícia Militar - 11º BPM",
+      channel: "190",
+      contact: "190",
+    },
   });
 
-  const geo = await prisma.geolocation.create({
+  console.log(`Autoridade criada: ${authority.id}`);
+
+  console.log("Criando Geolocation seed...");
+  const geolocation = await prisma.geolocation.create({
     data: {
-      street: 'Rua Exemplo',
-      district: 'Centro',
-      city: 'Manhuaçu',
-      number: '100',
+      street: "Rua Teste",
+      district: "Centro",
+      city: "Manhuaçu",
+      number: "100",
       latitude: -20.3,
       longitude: -41.9,
     },
   });
 
+  console.log(`Geolocation criada: ${geolocation.id}`);
+
+  console.log("Criando alerta seed...");
+
   const alert = await prisma.alert.create({
     data: {
       userId: user.id,
       userCpf: user.cpf,
-      notes: 'Alerta seed',
-      geolocationId: geo.id,
+      notes: "Alerta gerado via seed.ts",
+      geolocationId: geolocation.id,
       contacts: {
         create: [
-          { contactId: contact1.id },
-          { contactId: contact2.id },
+          { contactId: (await prisma.contact.findFirst({ where: { phone: "99990001" } }))!.id },
+          { contactId: (await prisma.contact.findFirst({ where: { phone: "99990002" } }))!.id },
         ],
       },
       authorities: {
         create: [{ authorityId: authority.id }],
       },
       statusHistory: {
-        create: [{ status: 'OPEN', note: 'Criado via seed' }],
+        create: [
+        {
+            status: "OPEN",
+            note: "Criado via seed inicial",
+          },
+        ],
       },
     },
-    include: { geolocation: true },
+    include: {
+      geolocation: true,
+      contacts: true,
+      authorities: true,
+      statusHistory: true,
+    },
   });
 
+  console.log(`Alerta criado: ${alert.id}`);
+
+  console.log("Criando teste de risco...");
   await prisma.riskTest.create({
     data: {
       userId: user.id,
       score: 18,
-      category: 'MEDIUM',
+      category: "MEDIUM",
       recommendations: [
-        'Procure uma autoridade',
-        'Avise um contato de confiança',
+        "Procure uma autoridade local.",
+        "Notifique contatos de confiança.",
       ],
     },
   });
 
-  console.log('Seed concluída!', { user: user.id, alert: alert.id });
+  console.log("SEED FINALIZADO!");
+  console.log({
+    user: user.id,
+    alert: alert.id,
+    authority: authority.id,
+    geolocation: geolocation.id,
+  });
 }
 
 main()
   .catch((e) => {
+    console.error("Erro no seed:");
     console.error(e);
     process.exit(1);
   })

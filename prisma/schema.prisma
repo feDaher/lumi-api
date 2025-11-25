@@ -16,6 +16,12 @@ enum UserStatus {
   BLOCKED
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
+
 // Categoria de risco (teste de risco)
 enum RiskCategory {
   LOW
@@ -35,20 +41,21 @@ enum AlertStatus {
 // Usuário do sistema (autenticável)
 model User {
   id        String      @id @default(cuid())
-  name      String      // nome do usuário
-  email     String      @unique // e-mail (login)
-  password  String      // hash (bcrypt)
-  cpf       String      @unique // CPF (identificador nacional)
-  status    UserStatus  @default(ACTIVE) // status do usuário
+  name      String
+  email     String      @unique
+  password  String
+  cpf       String      @unique
+  status    UserStatus  @default(ACTIVE)
+  role      UserRole    @default(USER)
+  
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
-  // relações
   contacts      Contact[]
   riskTests     RiskTest[]
   alerts        Alert[]
-  sessions      Session[] // sessões/tokens ativos
-  addresses     Address[] 
+  sessions      Session[]
+  addresses     Address[]
 }
 
 // Sessão/autenticação (controle de token por usuário)
@@ -68,16 +75,22 @@ model Session {
 // Contatos cadastrados pelo usuário (para notificação)
 model Contact {
   id        String   @id @default(cuid())
-  name      String   // nome do contato
-  phone     String   // telefone do contato
+  name      String
+  ddd       String @default("00")
+  phone     String
+  userId    String
+  user      User @relation(fields: [userId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  userId String
-  user   User     @relation(fields: [userId], references: [id])
-
-  // N:N com Alert via tabela pivô
   alerts AlertContacts[]
+
+  // Proteção de CRUD por usuário
+  @@unique([id, userId])
+
+  // Impedir duplicidade de contatos
+  @@unique([userId, ddd, phone])
 
   @@index([userId])
 }
@@ -190,15 +203,19 @@ model AlertStatusRecord {
 
 // Endereço padrão do usuário
 model Address {
-  id        String    @id @default(cuid())
-  logradouro String? //nome da rua/avenida
-  number    String?  //Número da casa
-  cep       String?  //CEP
-  district  String?  //Bairo
-  complement String? //Complemento
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  street       String?
+  houseNumber  String?
+  zipCode      String?
+  neighborhood String?
+  complement   String?
+  city         String?
+  state        String?
+  isPrimary    Boolean  @default(false)
 
-  // Relacionamento com usuário
-  userId String
-  user   User     @relation(fields: [userId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
