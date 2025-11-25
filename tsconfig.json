@@ -10,7 +10,8 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "typeRoots": ["./src/@types", "./node_modules/@types"]
   },
   "include": ["src/**/*", "env.ts"],
   "exclude": ["node_modules", "dist", "prisma.config.ts"]

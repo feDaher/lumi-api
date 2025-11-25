@@ -1,33 +1,50 @@
 import { prisma } from "../../prisma";
-import { contactCreateSchema, contactUpdateSchema } from "./contact.schemas";
 
 export class ContactService {
-  static async read() {
+
+  static async findAll(userId: string) {
     return prisma.contact.findMany({
-      orderBy: { criadoEm: "desc" },
+      where: { userId },
+      orderBy: { createdAt: "desc" },
     });
   }
 
-  static async create(data: unknown) {
-    const payload = contactCreateSchema.parse(data);
+  static async findById(userId: string, id: string) {
+    const contact = await prisma.contact.findFirst({
+      where: { id, userId },
+    });
 
+    if (!contact) throw { status: 404, message: "Contact not found" };
+
+    return contact;
+  }
+
+  static async create(userId: string, data: any) {
     return prisma.contact.create({
-      data: payload,
+      data: {
+        ...data,
+        userId,
+      },
     });
   }
 
-  static async update(id: string, data: unknown) {
-    const payload = contactUpdateSchema.parse(data);
-
+  static async updateById(userId: string, id: string, data: any) {
     return prisma.contact.update({
-      where: { id },
-      data: payload,
+      where: {
+        id_userId: {
+          id,
+          userId,
+        }
+      },
+      data,
     });
   }
 
-  static async delete(id: string) {
+  static async deleteById(userId: string, id: string) {
     return prisma.contact.delete({
-      where: { id },
+      where: {
+        id_userId: { id, userId },
+      },
     });
   }
 }

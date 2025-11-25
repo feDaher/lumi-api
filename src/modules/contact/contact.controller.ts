@@ -1,40 +1,47 @@
 import { Request, Response } from "express";
-import { ContatoService } from "./contato.service";
-import { contatoParamsSchema } from "./contact.schemas";
+import { ContactService } from "./contact.service";
+import { contactCreateSchema, contactUpdateSchema } from "./contact.schemas";
+import { contactParamsSchema } from "./contact.schemas";
 
-export class ContatoController {
-  static async listar(req: Request, res: Response) {
-    const contatos = await ContatoService.listar();
-    return res.json(contatos);
+export class ContactController {
+
+  static async getAll(req: Request, res: Response) {
+    const { id: userId } = req.user;
+
+    const contacts = await ContactService.findAll(userId);
+    return res.json(contacts);
   }
 
-  static async buscar(req: Request, res: Response) {
-    const { id } = contatoParamsSchema.parse(req.params);
+  static async getById(req: Request, res: Response) {
+    const { id: userId } = req.user;
+    const { id } = contactParamsSchema.parse(req.params);
 
-    const contato = await ContatoService.buscarPorId(id);
-    if (!contato) {
-      return res.status(404).json({ error: "Contato não encontrado" });
-    }
-
-    return res.json(contato);
+    const contact = await ContactService.findById(userId, id);
+    return res.json(contact);
   }
 
-  static async criar(req: Request, res: Response) {
-    const contato = await ContatoService.criar(req.body);
-    return res.status(201).json(contato);
+  static async create(req: Request, res: Response) {
+    const { id: userId } = req.user;
+    const payload = contactCreateSchema.parse(req.body);
+
+    const result = await ContactService.create(userId, payload);
+    return res.status(201).json(result);
   }
 
-  static async editar(req: Request, res: Response) {
-    const { id } = contatoParamsSchema.parse(req.params);
+  static async update(req: Request, res: Response) {
+    const { id: userId } = req.user;
+    const { id } = contactParamsSchema.parse(req.params);
+    const payload = contactUpdateSchema.parse(req.body);
 
-    const contato = await ContatoService.editar(id, req.body);
-    return res.json(contato);
+    const result = await ContactService.updateById(userId, id, payload);
+    return res.json(result);
   }
 
-  static async excluir(req: Request, res: Response) {
-    const { id } = contatoParamsSchema.parse(req.params);
+  static async delete(req: Request, res: Response) {
+    const { id: userId } = req.user;
+    const { id } = contactParamsSchema.parse(req.params);
 
-    await ContatoService.excluir(id);
+    await ContactService.deleteById(userId, id);
     return res.status(204).send();
   }
 }

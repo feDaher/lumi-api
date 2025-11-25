@@ -14,17 +14,14 @@ export async function postSignIn(req: Request, res: Response) {
     const result = await svc.signIn(email, password);
     return res.json(result);
   
-  }catch(error: any){
-    if(error === 401) {
-      return res.status(401).json({
-        name: error.name || 'Unauthorized',
-        message: error.message || 'Credênciais inválidas',
-      });
-    }
-  return res.status(500).json({
-  name: error.name || 'ServerError',
-  message: error.message || 'Server Error',
-  });
-}
+  } catch(error: any) {
+    if(error.status === 401) {
+      return res.status(401).json(error);
+    };
 
+    return res.status(500).json({
+      name: error.name || 'ServerError',
+      message: error.message || 'Server Error',
+    });
+  }
 }
