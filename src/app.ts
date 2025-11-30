@@ -11,7 +11,10 @@ import contactRoutes from './modules/contact/contact.routes';
 
 const app = express();
 
-app.use(cors({ origin: env.WEB_ORIGIN, credentials: true }));
+app.use(cors({
+  origin: "*",
+}));
+
 app.use(express.json());
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
