@@ -31,6 +31,7 @@ export class ContactService {
   static async updateById(userId: string, id: string, data: any) {
     return prisma.contact.update({
       where: {
+        //@ts-ignore
         id_userId: {
           id,
           userId,
@@ -43,6 +44,7 @@ export class ContactService {
   static async deleteById(userId: string, id: string) {
     return prisma.contact.delete({
       where: {
+        //@ts-ignore
         id_userId: { id, userId },
       },
     });

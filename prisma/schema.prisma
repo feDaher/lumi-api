@@ -65,7 +65,8 @@ model Session {
   active       Boolean  @default(true) // se a sessão está ativa
   lastAccess   DateTime @default(now()) // último acesso
   createdAt    DateTime @default(now())
-
+  expiresAt DateTime @default(now())
+  
   userId String
   user   User     @relation(fields: [userId], references: [id])
 

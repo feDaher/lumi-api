@@ -2,8 +2,10 @@ import { prisma } from '../../prisma.js';
 import bcrypt from 'bcrypt';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { env } from '../../env.js';
+import { SessionService } from '../sessions/sessions.service.js';
 
-export async function signUp(name: string, cpf: string, email: string, password: string) {
+export class AuthService {
+ async signUp(name: string, cpf: string, email: string, password: string) {
   const existsEmail = await prisma.user.findUnique({ where: { email } });
   if (existsEmail) throw { status: 409, name: 'Conflict', message: 'Email already registered' };
 
@@ -13,12 +15,11 @@ export async function signUp(name: string, cpf: string, email: string, password:
   const hash = await bcrypt.hash(password, 10);
 
   const user = await prisma.user.create({ data: { name, cpf ,email, password: hash } });
-  const token = jwt.sign({ sub: user.id, email: user.email }, env.JWT_SECRET, { expiresIn: env.JWT_EXPIRES_IN as SignOptions['expiresIn']});
 
-  return { user: { id: user.id, name: user.name, cpf: user.cpf ,email: user.email }, token };
+  return { user: { id: user.id, name: user.name, cpf: user.cpf ,email: user.email }};
 }
 
-export async function signIn(email: string, password: string) {
+ async signIn(email: string, password: string) {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) throw { status: 401, name: 'Unauthorized', message: 'Invalid credentials' };
 
@@ -27,5 +28,9 @@ export async function signIn(email: string, password: string) {
 
   const token = jwt.sign({ sub: user.id, email: user.email }, env.JWT_SECRET, { expiresIn: env.JWT_EXPIRES_IN as SignOptions['expiresIn']});
 
-  return { user: { id: user.id, name: user.name, cpf: user.cpf ,email: user.email }, token };
+  await SessionService.createSession(user.id, token);
+
+  return { user: { id: user.id, name: user.name, cpf: user.cpf ,email: user.email },
+           token };
+}
 }
