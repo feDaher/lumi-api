@@ -7,8 +7,8 @@ const router = Router();
 router.use(ensureAuth);
 
 router.get("/", ContactController.getAll);
-router.get("/:id", ContactController.getById);
 router.get("/search", ContactController.search);
+router.get("/:id", ContactController.getById);
 router.post("/", ContactController.create);
 router.put("/:id", ContactController.update);
 router.delete("/:id", ContactController.delete);

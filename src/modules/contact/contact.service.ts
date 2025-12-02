@@ -55,8 +55,8 @@ export class ContactService {
       where: {
         userId,
         OR: [
-          { name: {contains: term, mode: "insensitive"}},
-          { phone: {contains: term, mode: "insensitive"}},
+          { name: { contains: term, mode: "insensitive" }},
+          { phone: { contains: term, mode: "insensitive" }},
         ]
       }
     })

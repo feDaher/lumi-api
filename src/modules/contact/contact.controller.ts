@@ -45,8 +45,8 @@ export class ContactController {
     return res.status(204).send();
   }
 
-   static async search(req: Request, res: Response) {
-    const userId = req.user.id;
+  static async search(req: Request, res: Response) {
+    const { id: userId } = req.user;
     const term = req.query.search as string || "";
 
     const results = await ContactService.search(userId, term);
