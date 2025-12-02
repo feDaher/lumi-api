@@ -49,4 +49,16 @@ export class ContactService {
       },
     });
   }
+
+  static async search(userId: string, term: string) {
+    return prisma.contact.findMany({
+      where: {
+        userId,
+        OR: [
+          { name: {contains: term, mode: "insensitive"}},
+          { phone: {contains: term, mode: "insensitive"}},
+        ]
+      }
+    })
+  }
 }

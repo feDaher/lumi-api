@@ -44,4 +44,12 @@ export class ContactController {
     await ContactService.deleteById(userId, id);
     return res.status(204).send();
   }
+
+   static async search(req: Request, res: Response) {
+    const userId = req.user.id;
+    const term = req.query.search as string || "";
+
+    const results = await ContactService.search(userId, term);
+    return res.json(results);
+  }
 }
