@@ -7,7 +7,7 @@ export function errorMiddleware(err, req, res, next) {
 
   if (err instanceof ZodError) {
     const first = err.issues[0];
-    console.error({first});
+
     return res.status(400).json({
       success: false,
       status: 400,
