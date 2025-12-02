@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import {z} from 'zod';
 import { signInSchema, signUpSchema } from './auth.schemas';
 import { AuthService } from './auth.service';
@@ -8,19 +8,15 @@ const authService = new AuthService();
 
  export class AuthController {
 
-  async postSignIn(req: Request, res: Response) {
+  async postSignIn(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = signInSchema.parse(req.body);
 
       const result = await authService.signIn(email, password);
 
       return res.status(200).json(result);
-
-    } catch (error: any) {
-      const status = error.status || 500;
-      return res.status(status).json({
-        message: error.message || 'Internal server error',
-      });
+    } catch (err) {
+      next(err);
     }
   }
 
@@ -62,18 +58,26 @@ const authService = new AuthService();
     }
   }
 
-    async postSignUp(req: Request, res: Response) {
+  async postSignUp(req: Request, res: Response, next: NextFunction) {
     try {
-      const { name, cpf, email, password } = signUpSchema.parse(req.body);
+      const data = signUpSchema.parse(req.body);
 
-      const {user} = await authService.signUp(name, cpf, email, password);
+      const { user } = await authService.signUp(
+        data.name,
+        data.cpf,
+        data.email,
+        data.password
+      );
 
       return res.status(201).json({
-        user: { id: user.id, name: user.name, email: user.email },
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
       });
-    } catch (error: any) {
-      const status = error.status || 500;
-      return res.status(500).json({message: error.message});
+    } catch (err) {
+      next(err);
     }
   }
 }

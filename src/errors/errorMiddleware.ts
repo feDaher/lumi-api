@@ -1,41 +1,49 @@
-import { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 import { Prisma } from "@prisma/client";
 import { ApiError } from "./ApiError";
-import { ErrorResponse } from "./ErrorResponse";
-import { mapPrismaError } from "./errorMap";
-import { logger } from "../logger";
 
-export function errorMiddleware(
-  err: any,
-  _req: Request,
-  res: Response,
-  _next: NextFunction
-) {
-  logger.error(err);
+export function errorMiddleware(err, req, res, next) {
+  console.error("🔥 ERROR:", err);
 
-  // ZOD
   if (err instanceof ZodError) {
-    return res.status(400).json(
-      ErrorResponse(400, "VALIDATION_ERROR", "Erro de validação", {
-        issues: err.flatten(),
-      })
-    );
+    const first = err.issues[0];
+    console.error({first});
+    return res.status(400).json({
+      success: false,
+      status: 400,
+      code: first.code ?? 'invalid_format',
+      message: first?.message ?? "Erro de validação",
+      field: first?.path?.[0],
+      issues: err.issues,
+    });
   }
 
-  // PRISMA
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    const mapped = mapPrismaError(err);
-    return res.status(mapped.status).json(ErrorResponse(mapped.status, mapped.code, mapped.message, mapped.meta));
+    if (err.code === "P2002") {
+      return res.status(409).json({
+        success: false,
+        status: 409,
+        code: "UNIQUE_CONSTRAINT",
+        message: `${err.meta?.target} já existe`,
+        field: err.meta?.target?.[0],
+      });
+    }
   }
 
-  // ApiError custom
   if (err instanceof ApiError) {
-    return res.status(err.status).json(ErrorResponse(err.status, err.code, err.message, err.meta));
+    return res.status(err.status).json({
+      success: false,
+      status: err.status,
+      code: err.code,
+      message: err.message,
+      ...(err.meta ? { meta: err.meta } : {}),
+    });
   }
 
-  // Fallback
-  return res.status(500).json(
-    ErrorResponse(500, "INTERNAL_SERVER_ERROR", "Erro inesperado")
-  );
+  return res.status(500).json({
+    success: false,
+    status: 500,
+    code: "INTERNAL_SERVER_ERROR",
+    message: err.message ?? "Erro inesperado no servidor",
+  });
 }
