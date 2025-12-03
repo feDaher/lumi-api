@@ -6,7 +6,6 @@ export class ApiError extends Error {
   constructor(status: number, code: string, message: string, meta?: any) {
     super(message);
 
-    // Garante que instanceof ApiError funcione corretamente
     Object.setPrototypeOf(this, new.target.prototype);
 
     this.name = "ApiError";
@@ -14,7 +13,6 @@ export class ApiError extends Error {
     this.code = code;
     this.meta = meta;
 
-    // Opcional, mas bom para stack trace mais limpa
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, this.constructor);
     }

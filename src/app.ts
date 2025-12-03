@@ -6,6 +6,8 @@ import { errorMiddleware } from './errors/errorMiddleware';
 import { logger } from './logger';
 import authRoutes from './modules/auth/auth.routes';
 import contactRoutes from './modules/contact/contact.routes';
+import addressRoutes from './modules/address/address.routes';
+
 // import usersRoutes from './modules/users/users.routes';
 // import tasksRoutes from './modules/tasks/tasks.routes';
 
@@ -21,6 +23,7 @@ app.get('/health', (_req, res) => res.json({ ok: true }));
 
 app.use('/auth', authRoutes);
 app.use('/contact', contactRoutes);
+app.use('/address', addressRoutes);
 // app.use('/users', usersRoutes);
 // app.use('/tasks', tasksRoutes);
 
