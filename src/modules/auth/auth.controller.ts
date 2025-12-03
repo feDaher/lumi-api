@@ -80,5 +80,18 @@ const authService = new AuthService();
       next(err);
     }
   }
+
+  static async changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user.id;
+      const { oldPassword, newPassword } = req.body;
+
+      await AuthService.changePassword(userId, oldPassword, newPassword);
+
+      return res.json({ ok: true, message: "Senha alterada com sucesso" });
+    } catch (err: any) {
+      next(err);
+    }
+  }
 }
 

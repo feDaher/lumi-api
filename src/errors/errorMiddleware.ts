@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { ApiError } from "./ApiError";
 
 export function errorMiddleware(err, req, res, next) {
-  console.error("🔥 ERROR:", err);
+  console.error("ERROR:", err);
 
   if (err instanceof ZodError) {
     const first = err.issues[0];
