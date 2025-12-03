@@ -6,10 +6,13 @@ import { contactParamsSchema } from "./contact.schemas";
 export class ContactController {
 
   static async getAll(req: Request, res: Response) {
-    const { id: userId } = req.user;
+    const userId = req.user.id;
+    const page = Number(req.query.page ?? 1);
+    const limit = Number(req.query.limit ?? 20);
 
-    const contacts = await ContactService.findAll(userId);
-    return res.json(contacts);
+    const data = await ContactService.getPaginated(userId, page, limit);
+
+    return res.json(data);
   }
 
   static async getById(req: Request, res: Response) {
@@ -43,5 +46,13 @@ export class ContactController {
 
     await ContactService.deleteById(userId, id);
     return res.status(204).send();
+  }
+
+  static async search(req: Request, res: Response) {
+    const { id: userId } = req.user;
+    const term = req.query.search as string || "";
+
+    const results = await ContactService.search(userId, term);
+    return res.json(results);
   }
 }

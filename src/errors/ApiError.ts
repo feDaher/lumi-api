@@ -5,32 +5,40 @@ export class ApiError extends Error {
 
   constructor(status: number, code: string, message: string, meta?: any) {
     super(message);
+
+    Object.setPrototypeOf(this, new.target.prototype);
+
+    this.name = "ApiError";
     this.status = status;
     this.code = code;
     this.meta = meta;
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
   }
 
-  static badRequest(message = "Bad Request") {
-    return new ApiError(400, "BAD_REQUEST", message);
+  static badRequest(message = "Bad Request", meta?: any) {
+    return new ApiError(400, "BAD_REQUEST", message, meta);
   }
 
-  static unauthorized(message = "Unauthorized") {
-    return new ApiError(401, "UNAUTHORIZED", message);
+  static unauthorized(message = "Unauthorized", meta?: any) {
+    return new ApiError(401, "UNAUTHORIZED", message, meta);
   }
 
-  static forbidden(message = "Forbidden") {
-    return new ApiError(403, "FORBIDDEN", message);
+  static forbidden(message = "Forbidden", meta?: any) {
+    return new ApiError(403, "FORBIDDEN", message, meta);
   }
 
-  static notFound(message = "Not Found") {
-    return new ApiError(404, "NOT_FOUND", message);
+  static notFound(message = "Not Found", meta?: any) {
+    return new ApiError(404, "NOT_FOUND", message, meta);
   }
 
-  static conflict(message = "Conflict") {
-    return new ApiError(409, "CONFLICT", message);
+  static conflict(message = "Conflict", meta?: any) {
+    return new ApiError(409, "CONFLICT", message, meta);
   }
 
-  static internal(message = "Internal Server Error") {
-    return new ApiError(500, "INTERNAL_SERVER_ERROR", message);
+  static internal(message = "Internal Server Error", meta?: any) {
+    return new ApiError(500, "INTERNAL_SERVER_ERROR", message, meta);
   }
 }
